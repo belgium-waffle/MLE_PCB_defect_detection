@@ -1,11 +1,52 @@
-# MLE_PCB_defect_detection
-Our early version of PCB defect detection with YOLOv8 for the course ML for EEE 
 
 # 🔍 PCB Defect Detection using YOLOv8
 
 This project implements an **automated Printed Circuit Board (PCB) defect detection system** using the **YOLOv8** object detection model.  
 It identifies six major types of PCB defects from images with high accuracy, even on limited hardware resources.
 
+## 🧠 Abstract
+
+Printed Circuit Boards (PCBs) form the backbone of all modern electronics.  
+However, even a minor defect — like a missing hole, short, or open circuit — can render an entire device unusable.This project leverages **YOLOv8 (You Only Look Once)** for **automated, real-time defect detection** across multiple PCB defect types. The system achieves high accuracy with minimal compute cost, running efficiently on consumer GPUs.
+
+---
+
+## 🎯 Project Objectives
+
+1. Study common PCB defect patterns and YOLOv8 methodologies  
+2. Collect and annotate the dataset (from [Kaggle PCB Defects Dataset](https://www.kaggle.com/datasets/akhatova/pcb-defects))  
+3. Resize, normalize, and augment images using **OpenCV** for generalization  
+4. Train YOLOv8 on the curated dataset  
+5. Tune hyperparameters (learning rate, batch size, epochs)  
+6. Evaluate with **mAP**, **Precision**, **Recall**, and **F1-score**
+
+---
+
+## 🧩 Model Configuration
+
+| Parameter | Value |
+|------------|--------|
+| Base Model | `yolov8n.pt` *(Nano)* |
+| Image Size | 416 × 416 |
+| Batch Size | 2 |
+| Epochs | 40 |
+| Mosaic | 0.4 |
+| Mixup | 0.0 |
+| Save Period | 10 |
+| AMP | Enabled |
+| GPU | NVIDIA RTX 3050 Ti (4 GB) |
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone and Install Dependencies
+```bash
+git clone https://github.com/yourusername/PCB-Defect-Detection.git
+cd PCB-Defect-Detection
+
+pip install ultralytics gradio opencv-python-headless matplotlib
+```
 ---
 
 ## 🧠 Defect Classes
@@ -21,26 +62,6 @@ It identifies six major types of PCB defects from images with high accuracy, eve
 
 
 ## ⚙️ Setup Instructions
-
-### 1️⃣ Clone and install dependencies
-
-git clone https://github.com/yourusername/PCB-Defect-Detection.git
-cd PCB-Defect-Detection
-
-pip install ultralytics gradio opencv-python-headless matplotlib
-
-## 🧩 Model Training
-Model Configuration
-Parameter	Value
-Base model	yolov8n.pt (Nano)
-Image size	416 × 416
-Batch size	2
-Epochs	40
-Mosaic	0.4
-Mixup	0.0
-Save period	10
-AMP	Enabled
-Device	NVIDIA RTX 3050 Ti (4 GB)
 
 Training Notes
 The model was trained on six PCB defect classes.
@@ -96,3 +117,5 @@ Sample interface:
 - Gradio simplifies deployment for real-time visualization and testing.
 
 - Careful tuning of batch size, epochs, and augmentation yields strong defect detection even with limited data.
+
+  
