@@ -1,0 +1,5 @@
+ultralytics>=8.0.100
+gradio>=4.0
+opencv-python
+
+pip install -r requirements.txt
