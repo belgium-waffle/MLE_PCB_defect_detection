@@ -1,121 +1,280 @@
 
-# 🔍 PCB Defect Detection using YOLOv8
-
-This project implements an **automated Printed Circuit Board (PCB) defect detection system** using the **YOLOv8** object detection model.  
-It identifies six major types of PCB defects from images with high accuracy, even on limited hardware resources.
-
-## 🧠 Abstract
-
-Printed Circuit Boards (PCBs) form the backbone of all modern electronics.  
-However, even a minor defect — like a missing hole, short, or open circuit — can render an entire device unusable.This project leverages **YOLOv8 (You Only Look Once)** for **automated, real-time defect detection** across multiple PCB defect types. The system achieves high accuracy with minimal compute cost, running efficiently on consumer GPUs.
+# 🔍 PCB Defect Detection using YOLOv8  
+### BITS Pilani — Machine Learning for EEE (MLE) Course Project  
+**Team Members:**  
+- Jaikumar Wath (2023A3PS0197G)  
+- Aditya Mane (2023A3PS0505G)  
+- Vaibhav Divakar (2023A3PS0527G)
 
 ---
 
-## 🎯 Project Objectives
+## 📌 Project Overview
 
-1. Study common PCB defect patterns and YOLOv8 methodologies  
-2. Collect and annotate the dataset (from [Kaggle PCB Defects Dataset](https://www.kaggle.com/datasets/akhatova/pcb-defects))  
-3. Resize, normalize, and augment images using **OpenCV** for generalization  
-4. Train YOLOv8 on the curated dataset  
-5. Tune hyperparameters (learning rate, batch size, epochs)  
-6. Evaluate with **mAP**, **Precision**, **Recall**, and **F1-score**
+This repository contains our full pipeline for **automated PCB defect detection** using **YOLOv8**.  
+The goal is to reliably detect six types of microscopic PCB manufacturing defects:
 
----
-
-## 🧩 Model Configuration
-
-| Parameter | Value |
-|------------|--------|
-| Base Model | `yolov8n.pt` *(Nano)* |
-| Image Size | 416 × 416 |
-| Batch Size | 2 |
-| Epochs | 40 |
-| Mosaic | 0.4 |
-| Mixup | 0.0 |
-| Save Period | 10 |
-| AMP | Enabled |
-| GPU | NVIDIA RTX 3050 Ti (4 GB) |
-
----
-
-## ⚙️ Setup Instructions
-
-### 1️⃣ Clone and Install Dependencies
-```bash
-git clone https://github.com/yourusername/PCB-Defect-Detection.git
-cd PCB-Defect-Detection
-
-pip install ultralytics gradio opencv-python-headless matplotlib
-```
----
-
-## 🧠 Defect Classes
-
-- Missing Hole  
-- Mouse Bite  
-- Open Circuit  
+- Missing hole  
+- Mouse bite  
+- Open circuit  
 - Short  
 - Spur  
-- Spurious Copper
+- Spurious copper  
+
+The project includes:
+
+- 📁 Complete dataset preprocessing pipeline  
+- 🔄 XML → YOLO format annotation conversion  
+- 🧠 Training using YOLOv8m (768×768)  
+- 🔃 3-Fold Cross Validation  
+- 📊 Training curves + detailed metrics  
+- 🌐 Deployment as a **Gradio Web Application**  
+- 📦 Released final trained model  
 
 ---
 
+## 📁 **Repository Structure**
 
-## ⚙️ Setup Instructions
+- **Website/**
+  - Gradio Web App (final deployed product)
 
-Training Notes
-The model was trained on six PCB defect classes.
+- **example_images/**
+  - Sample accurate model output images for you to see 
 
-Average VRAM usage: ~1.2 GB
+- **final_results/**
+  - Final validation metrics, loss curves, training plots, and prediction screenshots
 
-Disk usage: <1 GB
+- **midsem/**
+  - Mid-semester submission (baseline code, report, and intermediate results)
 
-Validation Accuracy:
+- **git_vs_us/**
+  - Comparison between public GitHub YOLOv8 training scripts and our optimized pipeline
+  - Includes YOLOv8m vs YOLOv8s comparison experiments
 
-mAP@50: ~0.45–0.55
+- **finalyolov8m.ipynb**
+  - Main training notebook (YOLOv8m at 768×768 with 3-Fold Cross-Validation)
 
-mAP@50–95: ~0.20–0.30
+- **README.md**
+  - Full project documentation (this file)
 
-## 🧪 Inference (Prediction)
-Run detection on a single image:
+- **Release/Final_Trained_Model/**
+  - Exported final model weights (`best.pt`, `best.torchscript`)
 
-python
-Copy code
+
+---
+
+## 📦 Dataset Information
+
+We use the **PCB Defects** dataset released by the  
+*Open Lab on Human–Robot Interaction (Peking University)*.
+
+Dataset link:  
+🔗 **https://www.kaggle.com/datasets/akhatova/pcb-defects/data**
+
+Dataset structure (per class):
+
+
+
+PCB_DATASET/
+├── images/
+│ ├── Missing_hole/
+│ ├── Mouse_bite/
+│ ├── Open_circuit/
+│ ├── Short/
+│ ├── Spur/
+│ └── Spurious_copper/
+└── Annotations/ (Pascal VOC XML)
+
+
+We parse all VOC XML annotations and convert them into normalized YOLOv8 `.txt` format.
+
+---
+
+## 🔧 **Key Features of This Project**
+
+### ✔ 1. **Custom XML → YOLO Converter**
+We implemented a scalable XML parsing pipeline using `xml.etree.ElementTree`, converting:
+
+
+
+xmin, ymin, xmax, ymax → (class, x_center, y_center, width, height)
+
+
+Fully automatic, supports thousands of images.
+
+---
+
+### ✔ 2. **Correct Letterbox Preprocessing (No Distortion)**  
+Unlike naive resizing, our preprocessing:
+
+- preserves aspect ratio  
+- pads remaining space with 114  
+- applies the same affine transform to bounding boxes  
+
+This matches Ultralytics behavior and improves mAP noticeably.
+
+---
+
+### ✔ 3. **Train/Val/Test Split + K-Fold Cross Validation**
+
+We generate:
+
+
+
+train/
+val/
+test/
+
+
+and additionally perform **3-fold CV** to evaluate model robustness.
+
+Each fold gets its own:
+
+- images/
+- labels/
+- dataset.yaml  
+
+---
+
+### ✔ 4. **YOLOv8m Training with Advanced Augmentations**
+
+We train **YOLOv8m (25M params)** at **768×768** resolution using Kaggle GPU (T4/P100).  
+Augmentations include:
+
+- Mosaic = 0.8  
+- RandAugment  
+- Copy-Paste  
+- HSV jitter  
+- Perspective = 0.0005  
+- Erasing = 0.35  
+
+These improve tiny-defect detection significantly.
+
+---
+
+### ✔ 5. **Final Performance (Fold-2 Best Model)**
+
+| Metric        | Score |
+|---------------|-------|
+| Precision     | **0.966** |
+| Recall        | **0.962** |
+| mAP@50        | **0.972** |
+| mAP@50–95     | **0.529** |
+
+Per-class AP values show strong performance across all 6 defect types.
+
+---
+
+### ✔ 6. **Gradio Web Application (Productization)**
+
+We convert our model into a **real, usable tool**:
+
+🔗 *`Website/app.py`* contains a Gradio interface:
+
+- upload a PCB image  
+- YOLOv8 runs inference  
+- annotated image is returned instantly  
+
+This demonstrates practical deployability for factory QC lines.
+
+---
+
+## 🚀 **How to Run the Project**
+
+### 1. Install dependencies
+
+```pip install ultralytics gradio opencv-python-headless matplotlib pandas```
+
+2. Download dataset
+
+Upload the dataset in the same structure as described above.
+
+3. Run the preprocessing + training notebook
+jupyter notebook finalyolov8m.ipynb
+
+4. Run the final trained model
 from ultralytics import YOLO
-model = YOLO('pcb_light_final/train/weights/best.pt')
-results = model.predict(source='test_image.jpg', imgsz=416, conf=0.25)
-results[0].show()
-Predicted outputs are saved in:
+model = YOLO("final_model/best.pt")
+model.predict("example_images/short_01.jpg")
 
-bash
-Copy code
-runs/detect/predict/
-## 🌐 Gradio Web App
-Launch the app
-bash
-Copy code
-python pcb_gradio.py
-App Features
-Upload PCB image → get defect detections in real time
-
-Displays bounding boxes, class labels, and confidence scores
-
-Works locally and supports public Gradio links for sharing
-
-python
-Copy code
-demo.launch(server_name="0.0.0.0", server_port=None)
-Sample interface:
-<img width="1920" height="1080" alt="Screenshot from 2025-11-04 08-33-45" src="https://github.com/user-attachments/assets/865a3cc8-2bd8-431a-9650-7d5f87b134ca" />
+5. Launch the Gradio Web App
+cd Website
+python app.py
 
 
-💡 Key Learnings
-- YOLOv8-nano performs efficiently on low-VRAM GPUs (RTX 3050 Ti 4 GB).
+The interface will be available at:
 
-- Using resized images (416×416) ensures consistent results with trained input scale.
+http://localhost:7860
 
-- Gradio simplifies deployment for real-time visualization and testing.
+---
 
-- Careful tuning of batch size, epochs, and augmentation yields strong defect detection even with limited data.
+## 📥 Download Final Model
 
-  
+The final trained model is provided as part of the GitHub release bundle:
+
+**Included:**
+- ✔ `best.pt` (PyTorch YOLOv8 format)
+
+You can download it from:
+
+👉 **Releases → Final Trained Model**
+
+---
+
+## 🧪 Training Curve Examples
+
+Training logs, epoch-wise metrics, and loss curves are available in:
+
+final_results/
+
+
+This folder includes:
+- Box loss vs. epochs  
+- Class loss vs. epochs  
+- Distribution focal loss  
+- Validation mAP curves  
+- Sample predictions  
+
+---
+
+## 📚 Technologies Used
+
+This project was built using:
+
+- **Python 3.10**
+- **YOLOv8 (Ultralytics)**
+- **PyTorch**
+- **OpenCV**
+- **NumPy / Pandas**
+- **Matplotlib**
+- **Gradio (Web Deployment)**
+- **Kaggle GPU Compute (T4 / P100)**
+
+---
+
+## 👨‍💻 Contributions
+
+All team members contributed equally across the following components:
+
+- Dataset preprocessing & organization  
+- XML parsing and YOLO label generation  
+- Model training and hyperparameter tuning  
+- K-Fold cross-validation setup  
+- Inference visualization & evaluation  
+- Gradio web interface development  
+- Report writing and documentation  
+
+---
+
+## 📄 License
+
+This project is released under the **MIT License**.  
+You are free to use, modify, and distribute this project with proper attribution.
+
+---
+
+## ⭐ Support
+
+If you found this project useful, please consider giving the repository a **⭐ star** on GitHub.  
+It helps others discover the project and supports our work.
+
+---
