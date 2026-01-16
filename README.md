@@ -1,10 +1,6 @@
 
 # 🔍 PCB Defect Detection using YOLOv8  
 ### BITS Pilani — Machine Learning for EEE (MLE) Course Project  
-**Team Members:**  
-- Jaikumar Wath (2023A3PS0197G)  
-- Aditya Mane (2023A3PS0505G)  
-- Vaibhav Divakar (2023A3PS0527G)
 
 ---
 
